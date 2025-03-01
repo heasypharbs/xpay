@@ -193,6 +193,8 @@ To publish your Dockerized Laravel application:
 1. **Build the Docker image**
    ```sh
    docker build -t your-app-name .
+
+   
    ```
 2. **Push the image to Docker Hub**
    ```sh
