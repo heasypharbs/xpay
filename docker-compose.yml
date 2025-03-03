@@ -11,25 +11,40 @@ services:
     volumes:
       - .:/var/www
     depends_on:
-      - db
+      db:
+        condition: service_healthy  # Waits until MySQL is fully ready
     networks:
       - laravel
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD: ${DB_PASSWORD}
 
-  db:  # Fixed indentation issue
+  db:
     image: mysql:8
     container_name: xpay
     restart: unless-stopped
     environment:
-      MYSQL_DATABASE: xpay
-      MYSQL_ROOT_PASSWORD: ""  # Empty password for MySQL
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3306:3306"
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - laravel
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 3
+      timeout: 5s
 
-  nginx:  # Fixed indentation issue
+  nginx:
     image: nginx:latest
     container_name: laravel_nginx
     restart: unless-stopped
